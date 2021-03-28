@@ -39,18 +39,24 @@ class Consumer(Thread):
         self.name = kwargs['name']
 
     def run(self):
+        # The list of carts is iterated
         for i in range(0, len(self.carts)):
+            # The list of products of the current cart is iterated
             for j in range(0, len(self.carts[i])):
+                # Check the type of the operation
                 if self.carts[i][j]['type'] == 'add':
+                    # Call the add_to_cart method until the desired quantity is added
+                    # If the product is not available, the consumer will wait
                     for _ in range(0, self.carts[i][j]['quantity']):
                         while not self.marketplace.add_to_cart(
                                 self.cart_id, self.carts[i][j]['product']):
                             time.sleep(self.retry_wait_time)
                 elif self.carts[i][j]['type'] == 'remove':
+                    # Call the remove_from_cart method until the desired quantity is removed
                     for _ in range(0, self.carts[i][j]['quantity']):
                         self.marketplace.remove_from_cart(self.cart_id, self.carts[i][j]['product'])
 
-
+        # Print the final order of the consumer
         product_list = self.marketplace.place_order(self.cart_id)
         for product, _ in product_list:
             print(self.name, "bought", product[0])

@@ -35,16 +35,24 @@ class Producer(Thread):
         self.products = products
         self.marketplace = marketplace
         self.republish_wait_time = republish_wait_time
-        self.ID = marketplace.register_producer()
+        self.producer_id = marketplace.register_producer()
         self.current_product_nr = 0
 
     def run(self):
+        # The producer creates products in a loop
         while 1:
+            # Create the required quantity of the current product from the list
             for _ in range(0, self.products[self.current_product_nr][1]):
                 time.sleep(self.products[self.current_product_nr][2])
 
-                while not self.marketplace.publish(self.ID, self.products[self.current_product_nr]):
+                # Wait until there is enough space to publish a new product
+                while not self.marketplace.publish(
+                        self.producer_id, self.products[self.current_product_nr]):
                     time.sleep(self.republish_wait_time)
+
+            # Modify the index of the current product to be published
+            # If the list of products is finished, the index is reset
+            # to 0 and the list is iterated again
             if self.current_product_nr == len(self.products) - 1:
                 self.current_product_nr = 0
             else:

@@ -5,6 +5,7 @@ Computer Systems Architecture Course
 Assignment 1
 March 2021
 """
+from threading import Lock, Thread, Semaphore
 
 class Marketplace:
     """
@@ -23,6 +24,8 @@ class Marketplace:
         self.current_cart_id = -1
         self.consumer_shopping_list = []
         self.producer_items_list = []
+        self.producer_lock = Semaphore(1)
+        self.cart_lock = Semaphore(1)
 
     def register_producer(self):
         """
@@ -30,7 +33,10 @@ class Marketplace:
         """
         # Create a new id for the new producer and add an empty
         # list to the list of lists of products for each producer
-        self.current_producer_id = self.current_producer_id + 1
+        self.producer_lock.acquire()
+        self.current_producer_id += 1
+        self.producer_lock.release()
+
         self.producer_items_list.append([])
 
         return self.current_producer_id
@@ -64,7 +70,10 @@ class Marketplace:
         # Create a new cart id for the new consumer and add an empty
         # list to the list of lists of products added in cart
         # by each consumer
-        self.current_cart_id = self.current_cart_id + 1
+        self.cart_lock.acquire()
+        self.current_cart_id += 1
+        self.cart_lock.release()
+        
         self.consumer_shopping_list.append([])
 
         return self.current_cart_id
